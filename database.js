@@ -8,7 +8,7 @@ const db = mysql.createPool({
     database: 'assest_management',
     connectionLimit: 10,
     queueLimit: 0,
-    port: process.env.PORT
+    port: 3306
 })
 
 module.exports = {
