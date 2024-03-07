@@ -11,7 +11,9 @@ var assestRouter = require('./routes/assest');
 var corsOptions = {
     origin: '*',
 };
-app.use(cors(corsOptions));
+app.use(cors());
+
+
 
 app.listen(8081,()=>{
     console.log("listening")
