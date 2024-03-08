@@ -9,13 +9,15 @@ router.post('/login', async (req, res) => {
   try {
     const data = req.body
     const currentUser = await checkUserIsCorrect(data);
+    console.log(currentUser)
+
     if(currentUser.length > 0){
       const userName = data.email
       const user = { email: userName };
-      const accesToken = jwt.sign(user, process.env.ACCESS_TOKEN);
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN);
       res.json({
         status:'success',
-        accesToken,
+        accessToken,
         currentUser
       });
     }

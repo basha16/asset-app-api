@@ -1,24 +1,21 @@
 const { db } = require('../database');
 
 async function getAllUserAssests() {
-    const connection = await db.getConnection();
-    const sql = `SELECT A.*, B.first_name, B.last_name FROM user_assets A INNER JOIN user B ON A.assignee = B.id`
-    const [rows, fields] = await connection.query(sql);
+    const sql = `SELECT A.*, B.first_name, B.last_name FROM public.user_assets A INNER JOIN public.user B ON A.assignee = B.id`
+    const {rows} = await db.query(sql);
     return rows
 }
 
 async function getUserAssests(userId) {
-    const connection = await db.getConnection();
-    const sql = `SELECT A.*, B.first_name, B.last_name FROM user_assets A INNER JOIN user B ON A.assignee = B.id WHERE A.assignee = ?`
-    const [rows, fields] = await connection.query(sql, [userId]);
+    const sql = `SELECT A.*, B.first_name, B.last_name FROM public.user_assets A INNER JOIN public.user B ON A.assignee = B.id WHERE A.assignee = $1`
+    const {rows} = await db.query(sql, [userId]);
     return rows
 }
 
 async function assignUserAssest(values) {
-    const connection = await db.getConnection();
-    const sql = `INSERT INTO user_assets 
-        (id, name, description, quantity, assignee, status, created_at) 
-        VALUES (UUID(), ?, ?, ?, ?, ?, NOW())`;
+    const sql = `INSERT INTO public.user_assets 
+        (name, description, quantity, assignee, status) 
+        VALUES ($1, $2, $3, $4, $5)`;
 
     const params = [
         values.name,
@@ -27,21 +24,19 @@ async function assignUserAssest(values) {
         values.assignee,
         values.status
     ];
-    const [ResultSetHeader] = await connection.query(sql, params);
-    return ResultSetHeader.affectedRows > 0
+    const ResultSetHeader = await db.query(sql, params);
+    return ResultSetHeader.rowCount > 0
 }
 
 async function updateAssignedUser(values) {
-    const connection = await db.getConnection();
-    const sql = `UPDATE user_assets 
+    const sql = `UPDATE public.user_assets 
         SET 
-            name = ?,
-            description = ?,
-            quantity = ?,
-            assignee = ?,
-            status = ?,
-            updated_at = NOW()
-        WHERE id = ?`;
+            name = $1,
+            description = $2,
+            quantity = $3,
+            assignee = $4,
+            status = $5
+        WHERE id = $6`;
 
     const params = [
         values.name,
@@ -52,15 +47,14 @@ async function updateAssignedUser(values) {
         values.id
     ];
 
-    const [ResultSetHeader] = await connection.query(sql, params);
-    return ResultSetHeader.affectedRows > 0;
+    const ResultSetHeader = await db.query(sql, params);
+    return ResultSetHeader.rowCount > 0;
 }
 
 async function deleteAssetUser(assetId) {
-    const connection = await db.getConnection();
-    const sql = `DELETE FROM user_assets WHERE id = ?`
-    const [rows, fields] = await connection.query(sql, [assetId]);
-    return rows
+    const sql = `DELETE FROM public.user_assets WHERE id = $1`
+    const rows = await db.query(sql, [assetId]);
+    return rows.rowCount>0
 }
 
 module.exports = { getAllUserAssests, getUserAssests, assignUserAssest, updateAssignedUser, deleteAssetUser };

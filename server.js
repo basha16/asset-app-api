@@ -11,7 +11,7 @@ var assestRouter = require('./routes/assest');
 var corsOptions = {
     origin: '*',
 };
-app.use(cors());
+app.use(cors(corsOptions));
 
 
 

@@ -16,31 +16,38 @@ async function authendicateToken(req, res, next) {
 }
 
 async function checkUserIsCorrect(user) {
-    const connection = await db.getConnection();
-    const sql = `SELECT * FROM user WHERE email = ? AND password = ? LIMIT 1`
-    const [rows, fields] = await connection.query(sql, [user.email, user.password]);
-    return rows
+    const sql = `SELECT * FROM public.user WHERE email = $1 AND password = $2 LIMIT 1`
+    const  result= await db.query(sql, [user.email, user.password]);
+    console.log(result)
+    return result.rows
 }
 
 async function createNewUser(user) {
-    const connection = await db.getConnection();
-    const sql = `INSERT INTO user 
-    (id, first_name, last_name, email, password, position, team, created_at) 
-    VALUES (UUID(), ?, ?, ?, ?, ?, ?, NOW())`;
-    const sql2 = `SELECT * FROM user WHERE email = ? LIMIT 1`
-    const params = [user.firstName, user.lastName, user.email, user.password ,'admin', 'AA']
+    const sql = ` INSERT INTO public.user 
+    (first_name, last_name, email, password, position, team) 
+    VALUES ($1, $2, $3, $4, $5, $6)`;
+
+    const sql2 = `SELECT * FROM public.user WHERE email = $1 LIMIT 1`
+
+    const params = [
+        user.firstName,
+        user.lastName,
+        user.email,
+        user.password,
+        'admin',
+        'AA'
+      ];
+      
     try {
-         await connection.query(sql, params);
-        const [rows, fields] = await connection.query(sql2, [user.email]);
-        return rows;
+        await db.query(sql, params);
+        const result = await db.query(sql2, [user.email]);
+        return result.rows;
     } catch (error) {
         console.error('Error creating a new user:', error.message);
         return false
     } finally {
-        connection.release(); 
+        // db.release(); 
     }
-
-    return rows
 }
 
 module.exports = { authendicateToken, checkUserIsCorrect,createNewUser };
